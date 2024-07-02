@@ -26,10 +26,11 @@ layout(location = 0) in vec2 position;
 
 
 #define POS_IDX 0
-#define ROT_IDX 3
-#define SCALE_IDX 7
-#define OPACITY_IDX 10
-#define SH_IDX 11
+#define LANG_IDX 3
+#define ROT_IDX 6
+#define SCALE_IDX 10
+#define OPACITY_IDX 13
+#define SH_IDX 14
 
 layout (std430, binding=0) buffer gaussian_data {
 	float g_data[];
@@ -118,7 +119,7 @@ vec4 get_vec4(int offset)
 void main()
 {
 	int boxid = gi[gl_InstanceID];
-	int total_dim = 3 + 4 + 3 + 1 + sh_dim;
+	int total_dim = 3 + 3 + 4 + 3 + 1 + sh_dim;
 	int start = boxid * total_dim;
 	vec4 g_pos = vec4(get_vec3(start + POS_IDX), 1.f);
     vec4 g_pos_view = view_matrix * g_pos;
@@ -131,6 +132,9 @@ void main()
 		gl_Position = vec4(-100, -100, -100, 1);
 		return;
 	}
+
+	vec3 g_lang = get_vec3(start + LANG_IDX);
+
 	vec4 g_rot = get_vec4(start + ROT_IDX);
 	vec3 g_scale = get_vec3(start + SCALE_IDX);
 	float g_opacity = g_data[start + OPACITY_IDX];
@@ -167,6 +171,12 @@ void main()
 		depth = depth < 0.05 ? 1 : depth;
 		depth = 1 / depth;
 		color = vec3(depth, depth, depth);
+		return;
+	}
+
+	if (render_mod == -2)
+	{
+		color = vec3(g_lang[0], g_lang[1], g_lang[2]);
 		return;
 	}
 

@@ -142,9 +142,11 @@ class CUDARenderer(GaussianRenderBase):
         if wglSwapIntervalEXT is not None:
             wglSwapIntervalEXT(1 if self.reduce_updates else 0)
         else:
-            print("VSync is not supported")
+            pass
+            #print("VSync is not supported")
 
     def update_gaussian_data(self, gaus: util_gau.GaussianData):
+        print("render cuda")
         self.need_rerender = True
         self.gaussians = gaus_cuda_from_cpu(gaus)
         self.raster_settings["sh_degree"] = int(np.round(np.sqrt(self.gaussians.sh_dim))) - 1
@@ -213,6 +215,7 @@ class CUDARenderer(GaussianRenderBase):
         self.raster_settings["tanfovy"] = hfovy
 
     def draw(self):
+        print("render cuda")
         if self.reduce_updates and not self.need_rerender:
             gl.glUseProgram(self.program)
             gl.glBindTexture(gl.GL_TEXTURE_2D, self.tex)

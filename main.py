@@ -35,7 +35,7 @@ g_auto_sort = False
 g_show_control_win = True
 g_show_help_win = True
 g_show_camera_win = False
-g_render_mode_tables = ["Gaussian Ball", "Flat Ball", "Billboard", "Depth", "SH:0", "SH:0~1", "SH:0~2", "SH:0~3 (default)"]
+g_render_mode_tables = ["Gaussian Ball", "Flat Ball", "lang", "Depth", "SH:0", "SH:0~1", "SH:0~2", "SH:0~3 (default)"]
 g_render_mode = 7
 
 def impl_glfw_init():
@@ -194,7 +194,7 @@ def main():
                 imgui.text(f"# of Gaus = {len(gaussians)}")
                 if imgui.button(label='open ply'):
                     file_path = filedialog.askopenfilename(title="open ply",
-                        initialdir="C:\\Users\\MSI_NB\\Downloads\\viewers",
+                        initialdir="/home/vision/Documents/LangSplat/output/office_test_all_dens_scratch_3/point_cloud/iteration_1000/",
                         filetypes=[('ply file', '.ply')]
                         )
                     if file_path:
@@ -227,6 +227,7 @@ def main():
                 # render mode
                 changed, g_render_mode = imgui.combo("shading", g_render_mode, g_render_mode_tables)
                 if changed:
+                    print("render changed: ", g_render_mode - 4)
                     g_renderer.set_render_mod(g_render_mode - 4)
                 
                 # sort button

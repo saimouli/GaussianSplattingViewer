@@ -5,12 +5,14 @@ from dataclasses import dataclass
 @dataclass
 class GaussianData:
     xyz: np.ndarray
+    langauge_features: np.ndarray
     rot: np.ndarray
     scale: np.ndarray
     opacity: np.ndarray
     sh: np.ndarray
     def flat(self) -> np.ndarray:
-        ret = np.concatenate([self.xyz, self.rot, self.scale, self.opacity, self.sh], axis=-1)
+        ret = np.concatenate([self.xyz, self.langauge_features, self.rot, self.scale, self.opacity, self.sh], axis=-1)
+        #ret = np.concatenate([self.xyz, self.rot, self.scale, self.opacity, self.sh], axis=-1)
         return np.ascontiguousarray(ret)
     
     def __len__(self):
@@ -51,11 +53,12 @@ def naive_gaussian():
         1, 1, 1, 1
     ]).astype(np.float32).reshape(-1, 1)
     return GaussianData(
-        gau_xyz,
-        gau_rot,
-        gau_s,
-        gau_a,
-        gau_c
+        gau_xyz, #3
+        gau_xyz, #3
+        gau_rot, #4
+        gau_s, #3
+        gau_a, #1
+        gau_c #3
     )
 
 
@@ -65,7 +68,12 @@ def load_ply(path):
     xyz = np.stack((np.asarray(plydata.elements[0]["x"]),
                     np.asarray(plydata.elements[0]["y"]),
                     np.asarray(plydata.elements[0]["z"])),  axis=1)
+    
     opacities = np.asarray(plydata.elements[0]["opacity"])[..., np.newaxis]
+
+    language_features = np.stack((np.asarray(plydata.elements[0]["language_feature_x"]),
+                                  np.asarray(plydata.elements[0]["language_feature_y"]),
+                                  np.asarray(plydata.elements[0]["language_feature_z"])), axis=1)
 
     features_dc = np.zeros((xyz.shape[0], 3, 1))
     features_dc[:, 0, 0] = np.asarray(plydata.elements[0]["f_dc_0"])
@@ -96,6 +104,7 @@ def load_ply(path):
 
     # pass activate function
     xyz = xyz.astype(np.float32)
+    language_features = language_features.astype(np.float32)
     rots = rots / np.linalg.norm(rots, axis=-1, keepdims=True)
     rots = rots.astype(np.float32)
     scales = np.exp(scales)
@@ -105,9 +114,10 @@ def load_ply(path):
     shs = np.concatenate([features_dc.reshape(-1, 3), 
                         features_extra.reshape(len(features_dc), -1)], axis=-1).astype(np.float32)
     shs = shs.astype(np.float32)
-    return GaussianData(xyz, rots, scales, opacities, shs)
+    return GaussianData(xyz, language_features, rots, scales, opacities, shs)
+    #return GaussianData(xyz, rots, scales, opacities, shs)
 
 if __name__ == "__main__":
-    gs = load_ply("C:\\Users\\MSI_NB\\Downloads\\viewers\\models\\train\\point_cloud\\iteration_7000\\point_cloud.ply")
+    gs = load_ply("/home/vision/Documents/LangSplat/output/office_test_all_dens_scratch_3/point_cloud/iteration_7000/point_cloud.ply")
     a = gs.flat()
-    print(a.shape)
+    print("gs shape: ", a.shape)
